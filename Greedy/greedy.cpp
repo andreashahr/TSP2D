@@ -31,10 +31,10 @@ vector<Location> initLocationVector() {
   vector<Location> v; // locations to visit
   string line; // input holder
   double x, y;  // location coordinates
-  int space = 4, locsCnt;
+  int space = 0, locsCnt;
   getline(cin, line); // read line from stdin
   locsCnt = stoi(line); // first is locations count
-  for(int i = 0; i < locsCnt; i++, space = 4) {
+  for(int i = 0; i < locsCnt; i++, space = 0) {
     getline(cin, line); // read next line from stdin
     while(true) {
       if(line[space] == ' ') { // find space character
