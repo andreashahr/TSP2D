@@ -5,10 +5,14 @@
 #include <new>
 #include <vector>
 #include <limits>
-using namespace std; // for not having to type std:: everywhere
+using namespace std; // for not having to type std:: everywhere'
 
-const int MAX_2_OPT_DISTANCE = 20;
-const int 2_OPT_ROUNDS = 100;
+
+// r -path /cygdrive/c/Users/Henrik/Desktop/c++/TSP2D/Greedy/ < input.txt
+
+
+const int MAX_TWO_OPT_DISTANCE = 40;
+const int TWO_OPT_ROUNDS = 5;
 
 class Location {
 public:
@@ -73,60 +77,71 @@ vector<Location> greedyTour(vector<Location> v) {
   return path;
 }
 
+int path_distance(vector<Location> path) {
+  int size = path.size();
+  int distance = 0;
+  for(int i = 0; i < path.size(); i++) {
+    distance += path[i].distance(path[(i + 1) % size]);
+  }
+  return distance;
+}
+
+
+int path_distance(vector<Location> path, int start, int path_length) {
+  int size = path.size();
+  int distance = 0;
+  for(int i = 0; i <= path_length; i++) {
+    int j = (i + start) % size;
+    int next_j = (j + 1) % size;
+    distance += path[j].distance(path[next_j]);
+  }
+  return distance;
+}
+
 
 vector<Location> two_opt(vector<Location> path) {
-  int path_length = path.size();
-  // set distance to path length initionally
-  int 2_opt_distance = path_length; 
-  // if distance is more than boundry, decrease to boundry
-  if (2_opt_distance > MAX_2_OPT_DISTANCE) {
-    2_opt_distance = MAX_2_OPT_DISTANCE;
+  int size = path.size();
+  if (size < 4) return path;
+  // set distance to path length initially
+  int two_opt_distance = size - 4;
+  // if distance is more than boundary, decrease to boundary
+  if (two_opt_distance > MAX_TWO_OPT_DISTANCE) {
+    two_opt_distance = MAX_TWO_OPT_DISTANCE;
   }
-  //init som variables
-  int v, w, x, org_route, new_route, k = 0;
-  
-  while (k < 2_OPT_ROUNDS) {
+
+  int k = 0;
+  while (k < TWO_OPT_ROUNDS) {
     k++;
-    for(int u = 0; u < path_length; u++) {
+    for(int u = 0; u < path.size(); u++) {
+
       // one edge is (u,v), the other is (w,x)
-      v = u + 1 % path_length;
-      // setting w to a random value
-      w = (rand() % 2_opt_distance) % path_length;
-      //changing w if (w,x) will overlap (u,v)
-      if (w <= v && w >= u-1) w = (v + 1) % path_length; 
-      x = (w + 1) % path_length;
+      int v = (u + 1) % size;
 
-      int u_v = (&path[u])->distance(path[v]);
-      int w_x = (&path[w])->distance(path[x]);
-      org_route = u_v + w_x;
-
-      int u_w = (&path[u])->distance(path[w]);
-      int v_x = (&path[v])->distance(path[x]);
-      new_route = u_w + v_x;
-      
-      // Printing some shit
-      cout << "u " << u << endl;
-      cout << "v " << v << endl;
-      cout << "w " << w << endl;
-      cout << "x " << x << endl;
-      cout << "org_route " << org_route << endl;
-      cout << "new_route " << new_route << endl;
-
-      // swap if new route is better
-      if (new_route < org_route) {
-        swap(path[w],path[v]);
-      }
+      // setting x to a random value
+      int x = u + 3 + (rand() % two_opt_distance); // u + 0 = u, u + 1 = v, u + 2 = (maybe) w
+      int path_length = x - u;
+      int w = (x - 1) % size;
+      x = x % size;
+      int pd = path_distance(path, u, path_length);
+      swap(path[v], path[w]);
+      int new_pd = path_distance(path, u, path_length);
+      if (new_pd > pd) {
+        //change back if result was worse
+        swap(path[v], path[w]);
+      } 
     }
   }
   return path;
 }
 
 int main() {
-  vector<Location> locations = initLocationVector();
-  //vector<Location> path = greedyTour(locations);
-  vector<Location> path = two_opt(locations);
+  vector<Location> path = initLocationVector();
+  path = greedyTour(path);
+  cout << "greedy path distance " << path_distance(path) << endl;
+  path = two_opt(path);
+  cout << "two opt path distance " << path_distance(path) << endl;
   for(int i = 0; i < path.size(); i++) {
-    cout << (&path[i])->id << "\n";
+    cout << path[i].id << "\n";
   }
   return 0;
 }
