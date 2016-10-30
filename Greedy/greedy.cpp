@@ -5,25 +5,28 @@
 #include <new>
 #include <vector>
 #include <limits>
-using namespace std;
+using namespace std; // for not having to type std:: everywhere
 
 class Location {
 public:
+  // constructor
   Location(int id, double x, double y) {
     this->id = id;
     this->x = x;
     this->y = y;
     this->visited = false;
   }
+  // eucledian distance from this to arg: loc
   int distance(Location loc) {
     return round(sqrt((loc.x-x)*(loc.x-x)+(loc.y-y)*(loc.y-y)));
   }
-  int id;
+  int id; // the nth location from stdin
   double x;
   double y;
   bool visited;
 };
 
+// use stdin input as blueprint to set up locations vector
 vector<Location> initLocationVector() {
   vector<Location> v; // locations to visit
   string line; // input holder
@@ -47,14 +50,15 @@ vector<Location> initLocationVector() {
   return v;
 }
 
+// returns greedy tour as vector (pos 0 to n)
 vector<int> greedyTour(vector<Location> v) {
   vector<int> path;
-  int locIndex = 0;
+  int locIndex = 0; // start location index
   for(int n = 0; n < v.size(); n++) {
-    Location* currentLocation = &v.at(locIndex);
-    currentLocation->visited = true;
-    path.push_back(currentLocation->id);
-    int shortestPath = numeric_limits<int>::max();
+    Location* currentLocation = &v.at(locIndex); // location ptr
+    currentLocation->visited = true; // location is now visited
+    path.push_back(currentLocation->id); // add location to path
+    int shortestPath = numeric_limits<int>::max(); // minimize shortest path
     for(int i = 0; i < v.size(); i++) {
       if(true == v.at(i).visited) continue;
       if(currentLocation->distance(v.at(i)) < shortestPath) {
