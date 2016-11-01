@@ -7,12 +7,10 @@
 #include <limits>
 using namespace std; // for not having to type std:: everywhere'
 
+const int MAX_RAND_OPT_DISTANCE = 10;
+const int RAND_OPT_ROUNDS = 400;
 
-// r -path /cygdrive/c/Users/Henrik/Desktop/c++/TSP2D/Greedy/ < input.txt
 
-
-const int MAX_TWO_OPT_DISTANCE = 40;
-const int TWO_OPT_ROUNDS = 5;
 
 class Location {
 public:
@@ -53,6 +51,13 @@ vector<Location> initLocationVector() {
     x = stod(line); // now ends at index: space
     y = stod(&line[space+1]); // starts at index: space+1
     v.push_back(*(new Location(i,x,y))); // add location i to vector
+  }
+  return v;
+}
+
+vector<Location> mix(vector<Location> v) {
+  for(int i = 0; i < v.size(); i++) {
+    swap(v[rand() % v.size()], v[rand() % v.size()]);
   }
   return v;
 }
@@ -99,18 +104,18 @@ int path_distance(vector<Location> path, int start, int path_length) {
 }
 
 
-vector<Location> two_opt(vector<Location> path) {
+vector<Location> rand_opt(vector<Location> path) {
   int size = path.size();
   if (size < 4) return path;
   // set distance to path length initially
-  int two_opt_distance = size - 4;
+  int rand_opt_distance = size - 4;
   // if distance is more than boundary, decrease to boundary
-  if (two_opt_distance > MAX_TWO_OPT_DISTANCE) {
-    two_opt_distance = MAX_TWO_OPT_DISTANCE;
+  if (rand_opt_distance > MAX_RAND_OPT_DISTANCE) {
+    rand_opt_distance = MAX_RAND_OPT_DISTANCE;
   }
 
   int k = 0;
-  while (k < TWO_OPT_ROUNDS) {
+  while (k < RAND_OPT_ROUNDS) {
     k++;
     for(int u = 0; u < path.size(); u++) {
 
@@ -118,7 +123,7 @@ vector<Location> two_opt(vector<Location> path) {
       int v = (u + 1) % size;
 
       // setting x to a random value
-      int x = u + 3 + (rand() % two_opt_distance); // u + 0 = u, u + 1 = v, u + 2 = (maybe) w
+      int x = u + 3 + (rand() % rand_opt_distance); // u + 0 = u, u + 1 = v, u + 2 = (maybe) w
       int path_length = x - u;
       int w = (x - 1) % size;
       x = x % size;
@@ -130,16 +135,20 @@ vector<Location> two_opt(vector<Location> path) {
         swap(path[v], path[w]);
       } 
     }
+
+    //decreasing rand_opt
+    if (rand_opt_distance > 7) rand_opt_distance--;
   }
   return path;
 }
 
 int main() {
   vector<Location> path = initLocationVector();
+  path = mix(path);
+  //cout << "mix path distance " << path_distance(path) << endl;
+  path = rand_opt(path);
+  //cout << "two opt path distance " << path_distance(path) << endl;
   path = greedyTour(path);
-  cout << "greedy path distance " << path_distance(path) << endl;
-  path = two_opt(path);
-  cout << "two opt path distance " << path_distance(path) << endl;
   for(int i = 0; i < path.size(); i++) {
     cout << path[i].id << "\n";
   }
