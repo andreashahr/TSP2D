@@ -2,7 +2,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <new>
-#include <limits>
 #include <ctime>
 using namespace std;
 
@@ -64,13 +63,9 @@ int main() {
     }
   }
 
-  // set tour to greedy tour
   greedyTour(locations);
-  delete locations;
-  //printTourCoordinates(locations);
-  // make 2-opt on tour
   twoOpt();
-  //printTourCoordinates(locations);
+
   for(int i = 0; i < N; i++) {
     cout << tour[i] << "\n";
   }
@@ -78,14 +73,13 @@ int main() {
   return 0;
 }
 
-// sets arg tour to greedy tour
+// sets global var tour to greedy
 void greedyTour(Location* locations) {
-  srand(time(NULL));
-  int from = rand()%N; // start location
+  int from = 0; // start location
   tour[0] = from; // set start location
   for(int i = 1; i < N; i++) {
     locations[from].visited = true; // location is now visited
-    int minDistance = numeric_limits<int>::max(); // smallest distance
+    int minDistance = 1000001; // smallest distance
     int nextFrom = -1;
     // find smallest distance
     for(int to = 0; to < N; to++) {
@@ -100,32 +94,32 @@ void greedyTour(Location* locations) {
   }
 }
 
-int tourLength(int from, int to, int* tour) {
+int tourLength(int from, int to, int* atour) {
   int sum = 0;
   for(int i = from; i < to-1; i++) {
-    sum += distanceMatrix[tour[i]][tour[i+1]];
+    sum += distanceMatrix[atour[i]][atour[i+1]];
   }
   return sum;
 }
 
 void twoOpt() {
-  int* newtour = new int[N];
-  int best_distance = tourLength(0, N, tour);
-  int new_distance;
-  int* temptour;
-  bool optimize = true;
+  int* newtour = new int[N]; // holds improved tour attempt
+  int best_distance = tourLength(0, N, tour); // beat current tour
+  int new_distance; // ...with new distance
+  int* temptour; // for swapping tour <-> newtour ptrs
+  int optimize = N-1;
   while(optimize) {
-    optimize = false;
-    for (int i = 0; i < N-1; i++) {
-      for (int k = i+1; k < N; k++) {
+    optimize--;
+    for(int i = 0; i < N-1; i++) {
+      for(int k = i+1; k < N; k++) {
         twoOptSwap(newtour, i, k);
         new_distance = tourLength(0, N, newtour);
-        if (new_distance < best_distance) {
+        if(new_distance < best_distance) {
           best_distance = new_distance;
           temptour = tour;
           tour = newtour;
           newtour = temptour;
-          optimize = true;
+          optimize = N-1;
         }
       }
       if((((double) clock()-(double)start)/(double)CLOCKS_PER_SEC) > 1.98) {
