@@ -64,12 +64,11 @@ int main() {
   }
 
   greedyTour(locations);
-
-  twoOpt();
-
   for(int i = 0; i < N; i++) {
     cout << tour[i] << "\n";
   }
+  twoOpt();
+
   return 0;
 }
 
@@ -77,10 +76,10 @@ int main() {
 void greedyTour(Location* locations) {
   int from = 0; // start location
   int maxdist = 0, maxdAt = 0;
-  for(int i = 0; i < N-1; i++) {
-    if(distanceMatrix[i][i+1] > maxdist) {
-      maxdist = distanceMatrix[i][i+1];
-      maxdAt = i+1;
+  for(int i = 1; i < N; i++) {
+    if(distanceMatrix[0][i] > maxdist) {
+      maxdist = distanceMatrix[0][i];
+      maxdAt = i;
     }
   }
   from = maxdAt;
@@ -113,7 +112,7 @@ int tourLength(int from, int to, int* atour) {
 void twoOpt() {
   int* newtour = new int[N]; // holds improved tour attempt
   int new_distance = tourLength(0, N, tour); // beat current tour
-  int edgediff, best_diff, tempM = 0;
+  int edgediff, best_diff, bestM, tempM = 0;
   int* temptour; // for swapping tour <-> newtour ptrs
 
   for(int i = 1; i < N-1; i++) {
@@ -129,28 +128,46 @@ void twoOpt() {
       if(edgediff > 0) {
         twoOptSwap(newtour, i, k);
         best_diff = edgediff;
-        tempM = k+1;
-        for(int m = k+1; m < N-2; m++) {
-          edgediff += distanceMatrix[newtour[k]][newtour[m+1]];
-          edgediff -= distanceMatrix[newtour[k]][newtour[m+2]];
+        bestM = k;
+        int loctmp = 0;
+
+        for(int m = k; m < N-2; m++) {
+          edgediff += distanceMatrix[newtour[m-1]][newtour[m]] + distanceMatrix[newtour[m+1]][newtour[m+2]];
+          edgediff -= (distanceMatrix[newtour[m-1]][newtour[m+1]] + distanceMatrix[newtour[m]][newtour[m+2]]);
           if(edgediff <= 0) break;
           if(edgediff > best_diff) {
             best_diff = edgediff;
-            tempM = m;
+            bestM = m;
           }
+          tempM = m;
+          loctmp = newtour[m];
+          newtour[m] = newtour[m+1];
+          newtour[m+1] = loctmp;
         }
-        int loctmp = newtour[k+1];
-        while(tempM >= k) {
-          k++
-          newtour[k+1] = newtour[k+2];
+
+        cout << "\n" << "new: " << "\n";
+        for(int i = 0; i < N; i++) {
+          cout << tour[i] << "\n";
         }
-        newtour[k+2] = loctmp;
+        cout << "\n";
+
+        while(tempM > bestM) {
+          loctmp = newtour[tempM+1];
+          newtour[tempM+1] = newtour[tempM];
+          newtour[tempM] = loctmp;
+          tempM--;
+        }
+
+        cout << "\n" << "back: " << "\n";
+        for(int i = 0; i < N; i++) {
+          cout << tour[i] << "\n";
+        }
+        cout << "\n";
 
         temptour = tour;
         tour = newtour;
         newtour = tour;
 
-        i = 0;
         break;
       }
     }

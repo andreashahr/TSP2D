@@ -69,6 +69,7 @@ int main() {
   /*printTourCoordinates(locations);*/
   // make 2-opt on tour
   twoOpt();
+  cout << tourLength(0, N, tour) << "\n";
   /*printTourCoordinates(locations);*/
   for(int i = 0; i < N; i++) {
     cout << tour[i] << "\n";
